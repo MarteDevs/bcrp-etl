@@ -11,7 +11,6 @@ MESES_ES = {
 MES_NUM_A_TEXTO = {v: k for k, v in MESES_ES.items()}
 
 FECHA_INICIO_DEFAULT = "2020-1"
-FECHA_FIN = "2025-12"
 
 
 def periodo_a_numero(periodo: str) -> tuple[int, int]:
