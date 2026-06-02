@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>BCRP ETL — Reporte 2026-06-01_20-17-20</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Segoe UI',Arial,sans-serif; background:#f0f2f5; color:#1a1a2e; padding:30px; }
+  .container { max-width:1100px; margin:0 auto; }
+
+  h1 { font-size:24px; color:#1a1a2e; margin-bottom:4px; }
+  .subtitle { color:#666; font-size:13px; margin-bottom:30px; }
+
+  .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px; margin-bottom:30px; }
+  .card { background:#fff; border-radius:10px; padding:20px; box-shadow:0 1px 4px rgba(0,0,0,.08); }
+  .card .label { font-size:12px; text-transform:uppercase; color:#888; letter-spacing:.5px; }
+  .card .value { font-size:28px; font-weight:700; margin-top:6px; }
+  .card .value.success { color:#16a34a; }
+  .card .value.failed { color:#dc2626; }
+  .card .value.partial { color:#ea580c; }
+  .card .value.neutral { color:#2563eb; }
+
+  h2 { font-size:18px; margin:30px 0 14px; color:#1a1a2e; }
+
+  table { width:100%; border-collapse:collapse; background:#fff; border-radius:8px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,.08); }
+  th { background:#f8fafc; font-size:12px; text-transform:uppercase; color:#666; letter-spacing:.5px; padding:12px 14px; text-align:left; border-bottom:2px solid #e2e8f0; }
+  td { padding:11px 14px; border-bottom:1px solid #f1f5f9; font-size:14px; }
+  tr:last-child td { border-bottom:none; }
+
+  .badge { display:inline-block; padding:2px 10px; border-radius:12px; font-size:12px; font-weight:600; }
+  .badge.ok { background:#dcfce7; color:#16a34a; }
+  .badge.warn { background:#fef3c7; color:#d97706; }
+  .badge.err { background:#fee2e2; color:#dc2626; }
+
+  .section { background:#fff; border-radius:10px; padding:20px; box-shadow:0 1px 4px rgba(0,0,0,.08); margin-bottom:20px; }
+  .section-item { padding:6px 0; font-size:14px; }
+  .section-item .icon { margin-right:8px; }
+
+  .error-box { background:#fef2f2; border-left:4px solid #dc2626; padding:14px 18px; border-radius:6px; margin:10px 0; }
+  .error-box .msg { font-size:14px; color:#991b1b; }
+
+  .footer { margin-top:40px; font-size:12px; color:#999; text-align:center; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <h1>BCRP ETL — Reporte de Ejecuci&oacute;n</h1>
+  <div class="subtitle">2026-06-01 20:17:20 &middot; Duraci&oacute;n: 9s</div>
+
+  <!-- Summary cards -->
+  <div class="cards">
+    <div class="card">
+      <div class="label">Registros</div>
+      <div class="value neutral">12</div>
+    </div>
+    <div class="card">
+      <div class="label">Indicadores</div>
+      <div class="value neutral">4</div>
+    </div>
+    <div class="card">
+      <div class="label">Outliers</div>
+      <div class="value neutral">0</div>
+    </div>
+    <div class="card">
+      <div class="label">Estado</div>
+      <div class="value success">SUCCESS</div>
+    </div>
+  </div>
+
+  
+
+  <!-- Per-indicator table -->
+  <h2>Detalle por indicador</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Indicador</th>
+        <th>Registros</th>
+        <th>Outliers</th>
+        <th>Mínimo</th>
+        <th>Máximo</th>
+        <th>Promedio</th>
+      </tr>
+    </thead>
+    <tbody>
+    
+      <tr>
+        <td><strong>tipo_cambio_usd_pen</strong></td>
+        <td>3</td>
+        <td>
+          
+          <span class="badge ok">0</span>
+          
+        </td>
+        <td>3.3632</td>
+        <td>3.3755</td>
+        <td>3.3673</td>
+      </tr>
+    
+      <tr>
+        <td><strong>inflacion_mensual_ipc</strong></td>
+        <td>3</td>
+        <td>
+          
+          <span class="badge ok">0</span>
+          
+        </td>
+        <td>1.3518</td>
+        <td>1.5088</td>
+        <td>1.4097</td>
+      </tr>
+    
+      <tr>
+        <td><strong>reservas_internacionales</strong></td>
+        <td>3</td>
+        <td>
+          
+          <span class="badge ok">0</span>
+          
+        </td>
+        <td>89960.7652</td>
+        <td>90898.1836</td>
+        <td>90357.8110</td>
+      </tr>
+    
+      <tr>
+        <td><strong>tasa_referencia_bcrp</strong></td>
+        <td>3</td>
+        <td>
+          
+          <span class="badge ok">0</span>
+          
+        </td>
+        <td>4.2411</td>
+        <td>4.2500</td>
+        <td>4.2463</td>
+      </tr>
+    
+    </tbody>
+  </table>
+
+  <!-- Validation summary -->
+  <h2>Validaciones</h2>
+  <div class="section">
+    <div class="section-item">
+      <span class="icon">✅</span>
+      <strong>Estructura:</strong> 12 registros, 4 indicadores
+    </div>
+    <div class="section-item">
+      <span class="icon">✅</span>
+      <strong>Nulos:</strong> Sin valores nulos en columnas críticas
+    </div>
+    <div class="section-item">
+      <span class="icon">✅</span>
+      <strong>Duplicados:</strong> Sin registros duplicados
+    </div>
+    <div class="section-item">
+      <span class="icon">✅</span>
+      <strong>Rangos:</strong> Todos los valores dentro del rango esperado
+    </div>
+  </div>
+
+  <!-- Outlier details -->
+  
+
+  <!-- Errors -->
+  
+
+  <div class="footer">
+    Generado por BCRP ETL Pipeline &middot; 2026-06-01 20:17:20
+  </div>
+
+</div>
+</body>
+</html>
