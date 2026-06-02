@@ -70,7 +70,7 @@ def _validar_rangos(df: pd.DataFrame):
             logger.info(f"  ✓ '{indicador}': todos los valores dentro del rango esperado")
 
     if alertas > 0:
-        logger.warning(f"  ⚠ Total outliers detectados: {alertas} (se cargarán igual)")
+        logger.warning(f"Total outliers detectados: {alertas} (se cargarán igual)")
 
 
 def _validar_duplicados(df: pd.DataFrame):
@@ -81,7 +81,7 @@ def _validar_duplicados(df: pd.DataFrame):
         logger.warning(f"  ⚠ {cantidad} registros duplicados (indicador+periodo) — se eliminarán")
         return df.drop_duplicates(subset=["indicador", "periodo"])
     else:
-        logger.info("  ✓ Sin duplicados")
+        logger.info("   Sin duplicados")
         return df
 
 
@@ -108,6 +108,7 @@ def validate(df: pd.DataFrame) -> pd.DataFrame:
 
     _validar_estructura(df)       # CRÍTICO — puede lanzar ValidationError
     _validar_nulos(df)            # CRÍTICO si > 10%, ADVERTENCIA si <= 10%
+    
     df = _validar_duplicados(df)  # ADVERTENCIA — limpia y continúa
     _validar_rangos(df)           # ADVERTENCIA — registra y continúa
     _resumen_estadistico(df)      # INFO siempre
