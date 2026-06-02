@@ -1,6 +1,6 @@
 import pandas as pd
 import pytest
-from transformer import parse_valor, transform_serie, transform_all
+from transformer import parse_valor, transform_serie, transform_all, _enriquecer
 
 
 class TestParseValor:
@@ -64,3 +64,64 @@ class TestTransformAll:
         df = transform_all(raw_multiple)
         assert "fecha_carga" in df.columns
         assert df["fecha_carga"].notna().all()
+
+    def test_columnas_enriquecidas_presentes(self, raw_multiple):
+        df = transform_all(raw_multiple)
+        assert "variacion_pct" in df.columns
+        assert "media_movil_3m" in df.columns
+
+
+class TestEnriquecer:
+    def test_agrega_columnas(self):
+        df = pd.DataFrame({
+            "indicador": ["a", "a", "a"],
+            "periodo":   ["Ene.2020", "Feb.2020", "Mar.2020"],
+            "valor":     [100.0, 110.0, 121.0],
+            "nombre_api": ["X"] * 3,
+            "fecha_carga": [pd.Timestamp.now()] * 3,
+        })
+        result = _enriquecer(df)
+        assert "variacion_pct" in result.columns
+        assert "media_movil_3m" in result.columns
+
+    def test_variacion_pct_primera_fila_nan(self):
+        df = pd.DataFrame({
+            "indicador": ["a", "a"],
+            "periodo":   ["Ene.2020", "Feb.2020"],
+            "valor":     [100.0, 110.0],
+            "nombre_api": ["X"] * 2,
+            "fecha_carga": [pd.Timestamp.now()] * 2,
+        })
+        result = _enriquecer(df)
+        assert pd.isna(result.loc[0, "variacion_pct"])
+        assert result.loc[1, "variacion_pct"] == pytest.approx(10.0)
+
+    def test_media_movil_3m_correcta(self):
+        df = pd.DataFrame({
+            "indicador": ["a", "a", "a"],
+            "periodo":   ["Ene.2020", "Feb.2020", "Mar.2020"],
+            "valor":     [100.0, 110.0, 120.0],
+            "nombre_api": ["X"] * 3,
+            "fecha_carga": [pd.Timestamp.now()] * 3,
+        })
+        result = _enriquecer(df)
+        assert result.loc[0, "media_movil_3m"] == pytest.approx(100.0)
+        assert result.loc[1, "media_movil_3m"] == pytest.approx(105.0)
+        assert result.loc[2, "media_movil_3m"] == pytest.approx(110.0)
+
+    def test_grupos_independientes(self):
+        df = pd.DataFrame({
+            "indicador": ["a", "a", "b", "b"],
+            "periodo":   ["Ene.2020", "Feb.2020", "Ene.2020", "Feb.2020"],
+            "valor":     [100.0, 110.0, 500.0, 600.0],
+            "nombre_api": ["X"] * 4,
+            "fecha_carga": [pd.Timestamp.now()] * 4,
+        })
+        result = _enriquecer(df)
+        b_pct = result[result["indicador"] == "b"]["variacion_pct"].iloc[1]
+        assert b_pct == pytest.approx(20.0)
+
+    def test_df_vacio_retorna_vacio(self):
+        df = pd.DataFrame()
+        result = _enriquecer(df)
+        assert result.empty

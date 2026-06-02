@@ -65,6 +65,8 @@ def raw_multiple(raw_tc) -> dict:
     }
 
 
+COLUMNAS_ENRIQUECIDAS = ["variacion_pct", "media_movil_3m"]
+
 @pytest.fixture
 def df_valido() -> pd.DataFrame:
     return pd.DataFrame({

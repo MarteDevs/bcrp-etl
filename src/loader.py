@@ -27,6 +27,15 @@ def ensure_table(engine):
                 with engine.begin() as conn:
                     conn.execute(text(stripped))
         logger.info("  -> Tabla bcrp_indicadores creada")
+    else:
+        columns = [c["name"] for c in inspector.get_columns("bcrp_indicadores")]
+        with engine.begin() as conn:
+            if "variacion_pct" not in columns:
+                logger.info("  -> Agregando columna variacion_pct...")
+                conn.execute(text("ALTER TABLE bcrp_indicadores ADD variacion_pct FLOAT"))
+            if "media_movil_3m" not in columns:
+                logger.info("  -> Agregando columna media_movil_3m...")
+                conn.execute(text("ALTER TABLE bcrp_indicadores ADD media_movil_3m FLOAT"))
 
 def obtener_ultimos_periodos() -> dict[str, str | None]:
     engine = get_engine()
@@ -51,20 +60,28 @@ def load(df: pd.DataFrame):
     merge_sql = text("""
         MERGE bcrp_indicadores AS target
         USING (SELECT :indicador AS indicador, :periodo AS periodo,
-                      :valor AS valor, :nombre_api AS nombre_api) AS source
+                      :valor AS valor, :nombre_api AS nombre_api,
+                      :variacion_pct AS variacion_pct,
+                      :media_movil_3m AS media_movil_3m) AS source
         ON (target.indicador = source.indicador AND target.periodo = source.periodo)
         WHEN MATCHED THEN
-            UPDATE SET valor = source.valor, fecha_carga = GETDATE()
+            UPDATE SET valor = source.valor,
+                       variacion_pct = source.variacion_pct,
+                       media_movil_3m = source.media_movil_3m,
+                       fecha_carga = GETDATE()
         WHEN NOT MATCHED THEN
-            INSERT (indicador, periodo, valor, nombre_api, fecha_carga)
-            VALUES (source.indicador, source.periodo, source.valor, source.nombre_api, GETDATE());
+            INSERT (indicador, periodo, valor, nombre_api, variacion_pct, media_movil_3m, fecha_carga)
+            VALUES (source.indicador, source.periodo, source.valor,
+                    source.nombre_api, source.variacion_pct, source.media_movil_3m, GETDATE());
     """)
     with engine.begin() as conn:
         for _, row in df.iterrows():
             conn.execute(merge_sql, {
-                "indicador": row["indicador"],
-                "periodo":   row["periodo"],
-                "valor":     row["valor"],
-                "nombre_api": row["nombre_api"],
+                "indicador":      row["indicador"],
+                "periodo":        row["periodo"],
+                "valor":          row["valor"],
+                "nombre_api":     row["nombre_api"],
+                "variacion_pct":  row["variacion_pct"] if pd.notna(row["variacion_pct"]) else None,
+                "media_movil_3m": row["media_movil_3m"] if pd.notna(row["media_movil_3m"]) else None,
             })
         logger.info(f"  -> {len(df)} registros upsertados en SQL Server")
