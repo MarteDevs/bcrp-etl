@@ -33,4 +33,6 @@ def transform_all(raw_data: dict) -> pd.DataFrame:
     frames = []
     for nombre, raw in raw_data.items():
         frames.append(transform_serie(nombre, raw))
+    if not frames:
+        return pd.DataFrame(columns=["indicador", "periodo", "valor", "nombre_api", "fecha_carga"])
     return pd.concat(frames, ignore_index=True)

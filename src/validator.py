@@ -28,7 +28,7 @@ def _validar_estructura(df: pd.DataFrame):
     if faltantes:
         raise ValidationError(f"Columnas faltantes: {faltantes}")
 
-    logger.info(f"  ✓ Estructura OK — {len(df)} registros, {df['indicador'].nunique()} indicadores")
+    logger.info(f"  -> Estructura OK — {len(df)} registros, {df['indicador'].nunique()} indicadores")
 
 
 def _validar_nulos(df: pd.DataFrame):
@@ -44,9 +44,9 @@ def _validar_nulos(df: pd.DataFrame):
                     f"Columna '{col}' tiene {cantidad} nulos ({pct:.1f}%) — supera el 10% permitido."
                 )
             else:
-                logger.warning(f"  ⚠ Nulos en '{col}': {cantidad} registros ({pct:.1f}%)")
+                logger.warning(f"  -> Nulos en '{col}': {cantidad} registros ({pct:.1f}%)")
     else:
-        logger.info("  ✓ Sin valores nulos en columnas críticas")
+        logger.info("  -> Sin valores nulos en columnas críticas")
 
 
 def _validar_rangos(df: pd.DataFrame):
@@ -55,16 +55,16 @@ def _validar_rangos(df: pd.DataFrame):
     for indicador, (minimo, maximo) in RANGOS_ESPERADOS.items():
         subset = df[df["indicador"] == indicador]
         if subset.empty:
-            logger.warning(f"  ⚠ Indicador '{indicador}' no encontrado en los datos")
+            logger.warning(f"  -> Indicador '{indicador}' no encontrado en los datos")
             continue
 
         fuera = subset[(subset["valor"] < minimo) | (subset["valor"] > maximo)]
         if not fuera.empty:
             logger.warning(
-                f"  ⚠ '{indicador}': {len(fuera)} valores fuera del rango [{minimo}, {maximo}]"
+                f"  -> '{indicador}': {len(fuera)} valores fuera del rango [{minimo}, {maximo}]"
             )
             for _, row in fuera.iterrows():
-                logger.warning(f"      → Periodo: {row['periodo']}, Valor: {row['valor']}")
+                logger.warning(f"      -> Periodo: {row['periodo']}, Valor: {row['valor']}")
             alertas += len(fuera)
         else:
             logger.info(f"  ✓ '{indicador}': todos los valores dentro del rango esperado")
@@ -78,16 +78,16 @@ def _validar_duplicados(df: pd.DataFrame):
     dupes = df.duplicated(subset=["indicador", "periodo"])
     cantidad = dupes.sum()
     if cantidad > 0:
-        logger.warning(f"  ⚠ {cantidad} registros duplicados (indicador+periodo) — se eliminarán")
+        logger.warning(f"  -> {cantidad} registros duplicados (indicador+periodo) — se eliminarán")
         return df.drop_duplicates(subset=["indicador", "periodo"])
     else:
-        logger.info("   Sin duplicados")
+        logger.info("  -> Sin duplicados")
         return df
 
 
 def _resumen_estadistico(df: pd.DataFrame):
     """Imprime estadísticas del lote en el log."""
-    logger.info("  📊 Resumen por indicador:")
+    logger.info("  -> Resumen por indicador:")
     for indicador in df["indicador"].unique():
         subset = df[df["indicador"] == indicador]
         logger.info(
@@ -113,5 +113,5 @@ def validate(df: pd.DataFrame) -> pd.DataFrame:
     _validar_rangos(df)           # ADVERTENCIA — registra y continúa
     _resumen_estadistico(df)      # INFO siempre
 
-    logger.info("  ✓ Validación completada")
+    logger.info("  -> Validación completada")
     return df
