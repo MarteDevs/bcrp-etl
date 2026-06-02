@@ -2,7 +2,6 @@ import logging
 import sys
 import os
 
-# Setup de logging — crea la carpeta si no existe
 os.makedirs("logs", exist_ok=True)
 logging.basicConfig(
     level=logging.INFO,
@@ -14,28 +13,34 @@ logging.basicConfig(
 )
 logger = logging.getLogger("main")
 
-# Importar módulos del proyecto
 sys.path.insert(0, "src")
 from extractor import extract_all
 from transformer import transform_all
 from validator import validate
-from loader import load
+from loader import load, obtener_ultimos_periodos
 
 def run():
     logger.info("=== Iniciando pipeline ETL BCRP ===")
-    
-    logger.info("--- Fase 1: Extracción ---")
-    raw = extract_all()
-    
+
+    logger.info("--- Fase 0: Consultar último periodo cargado ---")
+    ultimos_periodos = obtener_ultimos_periodos()
+
+    logger.info("--- Fase 1: Extracción incremental ---")
+    raw = extract_all(ultimos_periodos)
+
     logger.info("--- Fase 2: Transformación ---")
     df = transform_all(raw)
-    
+
+    if df.empty:
+        logger.info("  -> No hay datos nuevos para cargar. Pipeline finalizado.")
+        return
+
     logger.info("--- Fase 3: Validación ---")
     df = validate(df)
-    
-    logger.info("--- Fase 4: Carga ---")
+
+    logger.info("--- Fase 4: Carga (UPSERT) ---")
     load(df)
-    
+
     logger.info("=== Pipeline completado ===")
 
 if __name__ == "__main__":

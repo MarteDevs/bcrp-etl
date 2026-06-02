@@ -67,7 +67,7 @@ def _validar_rangos(df: pd.DataFrame):
                 logger.warning(f"      -> Periodo: {row['periodo']}, Valor: {row['valor']}")
             alertas += len(fuera)
         else:
-            logger.info(f"  ✓ '{indicador}': todos los valores dentro del rango esperado")
+            logger.info(f"  -> '{indicador}': todos los valores dentro del rango esperado")
 
     if alertas > 0:
         logger.warning(f"Total outliers detectados: {alertas} (se cargarán igual)")

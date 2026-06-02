@@ -28,13 +28,43 @@ def ensure_table(engine):
                     conn.execute(text(stripped))
         logger.info("  -> Tabla bcrp_indicadores creada")
 
+def obtener_ultimos_periodos() -> dict[str, str | None]:
+    engine = get_engine()
+    inspector = inspect(engine)
+    if not inspector.has_table("bcrp_indicadores"):
+        logger.info("  -> Tabla bcrp_indicadores no existe — se cargará todo el historial")
+        return {}
+    with engine.begin() as conn:
+        result = conn.execute(
+            text("SELECT indicador, MAX(periodo) FROM bcrp_indicadores GROUP BY indicador")
+        )
+        ultimos = {row[0]: row[1] for row in result}
+        if ultimos:
+            logger.info(f"  -> Últimos periodos cargados: {ultimos}")
+        else:
+            logger.info("  -> BD vacía — se cargará todo el historial")
+    return ultimos
+
 def load(df: pd.DataFrame):
     engine = get_engine()
     ensure_table(engine)
+    merge_sql = text("""
+        MERGE bcrp_indicadores AS target
+        USING (SELECT :indicador AS indicador, :periodo AS periodo,
+                      :valor AS valor, :nombre_api AS nombre_api) AS source
+        ON (target.indicador = source.indicador AND target.periodo = source.periodo)
+        WHEN MATCHED THEN
+            UPDATE SET valor = source.valor, fecha_carga = GETDATE()
+        WHEN NOT MATCHED THEN
+            INSERT (indicador, periodo, valor, nombre_api, fecha_carga)
+            VALUES (source.indicador, source.periodo, source.valor, source.nombre_api, GETDATE());
+    """)
     with engine.begin() as conn:
-        for indicador in df["indicador"].unique():
-            conn.execute(text(
-                "DELETE FROM bcrp_indicadores WHERE indicador = :ind"
-            ), {"ind": indicador})
-        df.to_sql("bcrp_indicadores", conn, if_exists="append", index=False)
-        logger.info(f"  -> {len(df)} registros cargados en SQL Server")
+        for _, row in df.iterrows():
+            conn.execute(merge_sql, {
+                "indicador": row["indicador"],
+                "periodo":   row["periodo"],
+                "valor":     row["valor"],
+                "nombre_api": row["nombre_api"],
+            })
+        logger.info(f"  -> {len(df)} registros upsertados en SQL Server")

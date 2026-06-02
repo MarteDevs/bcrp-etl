@@ -17,5 +17,4 @@ DB_SERVER   = os.getenv("DB_SERVER", "localhost")
 DB_NAME     = os.getenv("DB_NAME", "bcrp_etl")
 DB_DRIVER   = "ODBC Driver 17 for SQL Server"
 
-FECHA_INICIO = "2020-1"
-FECHA_FIN    = "2025-12"
+FECHA_FIN = "2025-12"
