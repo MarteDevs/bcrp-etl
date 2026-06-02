@@ -1,0 +1,10 @@
+venv/
+.git/
+__pycache__/
+.pytest_cache/
+logs/
+reports/
+.agentos/
+*.md
+.env
+.env.example

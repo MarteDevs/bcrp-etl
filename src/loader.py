@@ -3,15 +3,22 @@ import logging
 import pandas as pd
 from sqlalchemy import create_engine, text, inspect
 
-from config import DB_SERVER, DB_NAME, DB_DRIVER
+from config import DB_SERVER, DB_NAME, DB_USER, DB_PASSWORD, DB_DRIVER
 
 logger = logging.getLogger(__name__)
 
-def get_engine():
-    conn_str = (
-        f"mssql+pyodbc://{DB_SERVER}/{DB_NAME}"
-        f"?driver={DB_DRIVER.replace(' ', '+')}&trusted_connection=yes"
-    )
+def get_engine(database=None):
+    db = database or DB_NAME
+    if DB_USER:
+        conn_str = (
+            f"mssql+pyodbc://{DB_USER}:{DB_PASSWORD}@{DB_SERVER}/{db}"
+            f"?driver={DB_DRIVER.replace(' ', '+')}"
+        )
+    else:
+        conn_str = (
+            f"mssql+pyodbc://{DB_SERVER}/{db}"
+            f"?driver={DB_DRIVER.replace(' ', '+')}&trusted_connection=yes"
+        )
     return create_engine(conn_str)
 
 def ensure_table(engine):
